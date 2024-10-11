@@ -2,33 +2,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { Server, StableBTreeMap, ic } from 'azle';
 import express from 'express';
 
-/**
- * `messagesStorage` - it's a key-value datastructure that is used to store messages.
- * {@link StableBTreeMap} is a self-balancing tree that acts as a durable data storage that keeps data across canister upgrades.
- * For the sake of this contract we've chosen {@link StableBTreeMap} as a storage for the next reasons:
- * - `insert`, `get` and `remove` operations have a constant time complexity - O(1)
- * - data stored in the map survives canister upgrades unlike using HashMap where data is stored in the heap and it's lost after the canister is upgraded
- *
- * Brakedown of the `StableBTreeMap(string, Message)` datastructure:
- * - the key of map is a `messageId`
- * - the value in this map is a message itself `Message` that is related to a given key (`messageId`)
- *
- * Constructor values:
- * 1) 0 - memory id where to initialize a map.
- */
-
-/**
- This type represents a message that can be listed on a board.
- */
-class Message {
-   id: string;
-   title: string;
-   body: string;
-   attachmentURL: string;
-   createdAt: Date;
-   updatedAt: Date | null
-}
-
 
 class Crypto {
   id: string;                                                                           // Unique identifier for the user
@@ -63,7 +36,6 @@ class Crypto {
 
 
 const cryptoStorage = StableBTreeMap<string, Crypto>(0);
-const messagesStorage = StableBTreeMap<string, Message>(0);
 
 export default Server(() => {
    const app = express();
@@ -73,11 +45,10 @@ export default Server(() => {
     console.log('...req.body', {...req.body});
       const crypto: Crypto =  {id: uuidv4(), createdAt: getCurrentDate(), ...req.body};
       cryptoStorage.insert(crypto.id, crypto);
-      console.log('isernt')
       res.json(crypto);
    });
 
-   app.get("/ohlc/:symbol", (req, res) => {
+   app.get("/ohlc/:id", (req, res) => {
     console.log('req', req);
     // const symbol: any = req.params.symbol;
     // console.log('symbol', symbol);
@@ -85,8 +56,11 @@ export default Server(() => {
     // let query: any = {};
     // if (symbol) query['symbol'] = symbol;
     // console.log('query', query);
+    const id = req.params.id;
 
-    let values: any = cryptoStorage.values();
+    let values = cryptoStorage.values();
+
+    const crypto_details = cryptoStorage.get(id).Some;
 
     // if (!query['symbol']) {
     //   values = values.forEach((item: Crypto) => {
@@ -96,8 +70,7 @@ export default Server(() => {
     //   });
     // }
 
-    console.log('values', values)
-    res.json(values);
+    res.status(200).json(crypto_details);
    });
 
   //  app.get("/messages/:idx_date", (req, res) => {
