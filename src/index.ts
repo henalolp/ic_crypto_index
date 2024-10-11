@@ -78,69 +78,16 @@ export default Server(() => {
    });
 
    app.get("/ohlc/:id", (req, res) => {
-    //console.log('req', req);
-    // const symbol: any = req.params.symbol;
-    // console.log('symbol', symbol);
-
-    // let query: any = {};
-    // if (symbol) query['symbol'] = symbol;
-    // console.log('query', query);
     const id = req.params.id;
-
-    let values = cryptoStorage.values();
-
     const record = cryptoStorage.get(id).Some;
-
     const crypto_details = {
       id: record?.id,
       symbol: record?.symbol,
       idx_date: record?.idx_date,
     }
-
     console.log('crypto_details', crypto_details);
-    // if (!query['symbol']) {
-    //   values = values.forEach((item: Crypto) => {
-    //     console.log('item', item)
-    //     console.log('query["symbol"]', query['symbol'])
-    //     return item.symbol === query['symbol'];
-    //   });
-    // }
-
     res.status(200).json(crypto_details);
    });
-
-  //  app.get("/messages/:idx_date", (req, res) => {
-  //     const messageId = req.params.id;
-  //     const messageOpt = messagesStorage.get(messageId);
-  //     if ("None" in messageOpt) {
-  //        res.status(404).send(`the message with id=${messageId} not found`);
-  //     } else {
-  //        res.json(messageOpt.Some);
-  //     }
-  //  });
-
-  //  app.put("/messages/:id", (req, res) => {
-  //     const messageId = req.params.id;
-  //     const messageOpt = messagesStorage.get(messageId);
-  //     if ("None" in messageOpt) {
-  //        res.status(400).send(`couldn't update a message with id=${messageId}. message not found`);
-  //     } else {
-  //        const message = messageOpt.Some;
-  //        const updatedMessage = { ...message, ...req.body, updatedAt: getCurrentDate()};
-  //        messagesStorage.insert(message.id, updatedMessage);
-  //        res.json(updatedMessage);
-  //     }
-  //  });
-
-  //  app.delete("/messages/:id", (req, res) => {
-  //     const messageId = req.params.id;
-  //     const deletedMessage = messagesStorage.remove(messageId);
-  //     if ("None" in deletedMessage) {
-  //        res.status(400).send(`couldn't delete a message with id=${messageId}. message not found`);
-  //     } else {
-  //        res.json(deletedMessage.Some);
-  //     }
-  //  });
 
    return app.listen();
 });
