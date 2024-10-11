@@ -49,7 +49,7 @@ export default Server(() => {
    });
 
    app.get("/ohlc/:id", (req, res) => {
-    console.log('req', req);
+    //console.log('req', req);
     // const symbol: any = req.params.symbol;
     // console.log('symbol', symbol);
 
@@ -60,8 +60,15 @@ export default Server(() => {
 
     let values = cryptoStorage.values();
 
-    const crypto_details = cryptoStorage.get(id).Some;
+    const record = cryptoStorage.get(id).Some;
 
+    const crypto_details = {
+      id: record?.id,
+      symbol: record?.symbol,
+      idx_date: record?.idx_date,
+    }
+
+    console.log('crypto_details', crypto_details);
     // if (!query['symbol']) {
     //   values = values.forEach((item: Crypto) => {
     //     console.log('item', item)
