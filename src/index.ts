@@ -48,6 +48,35 @@ export default Server(() => {
       res.json(crypto);
    });
 
+   app.get("/ohlc", (req, res) => {
+    const symbol: any = req.query.symbol;
+    console.log('symbol', symbol);
+
+    let records = cryptoStorage.values();
+    console.log('records', records)
+
+    let values: any = [];
+    if (symbol) {
+      values = records.map((item: Crypto) => {
+        console.log('item', item)
+        if (item.symbol === symbol) {
+          return {
+            id: item.id,
+            symbol: item.symbol,
+            open: item.open,
+            close: item.close,
+            high: item.high,
+            low: item.low,
+            idx_date: item.idx_date,
+            createdAt: item.createdAt
+          }
+        }
+      });
+    }
+
+    res.status(200).json(values);
+   });
+
    app.get("/ohlc/:id", (req, res) => {
     //console.log('req', req);
     // const symbol: any = req.params.symbol;
