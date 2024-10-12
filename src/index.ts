@@ -118,17 +118,57 @@ export default Server(() => {
     res.status(200).json(values);
    });
 
-   app.get("/ohlc/:id", (req, res) => {
-    const id = req.params.id;
-    const record = CryptoStorage.get(id).Some;
-    const crypto_details = {
-      id: record?.id,
-      symbol: record?.symbol,
-      idx_date: record?.idx_date,
+   app.get("/ohlc/by_date", (req, res) => {
+    const startDateParam = req.query.startDate;
+    const endDateParam = req.query.endDate;
+    console.log('startDateParam', startDateParam)
+    console.log('endDateParam', endDateParam)
+
+    if (!startDateParam || !endDateParam) {
+      res.status(200).json([]);
     }
-    console.log('crypto_details', crypto_details);
-    res.status(200).json(crypto_details);
+
+    const records = CryptoStorage.values();
+
+    let filtered = records.filter((item: Crypto) => {
+      const idx_date = new Date(item.idx_date);
+      const startDate = new Date(startDateParam);
+      const endDate = new Date(endDateParam);
+      console.log('startDate', startDate)
+      console.log('endDate', endDate)
+
+      return (idx_date > startDate && idx_date < endDate)
+    });
+
+
+    const items = filtered.map(item => {
+      return {
+        id: item.id,
+        symbol: item.symbol,
+        open: item.open,
+        close: item.close,
+        high: item.high,
+        low: item.low,
+        idx_date: item.idx_date,
+        createdAt: item.createdAt
+      };
+    })
+
+    res.status(200).json(items);
    });
+
+
+  //  app.get("/ohlc/:id", (req, res) => {
+  //   const id = req.params.id;
+  //   const record = CryptoStorage.get(id).Some;
+  //   const crypto_details = {
+  //     id: record?.id,
+  //     symbol: record?.symbol,
+  //     idx_date: record?.idx_date,
+  //   }
+  //   console.log('crypto_details', crypto_details);
+  //   res.status(200).json(crypto_details);
+  //  });
 
    return app.listen();
 });
