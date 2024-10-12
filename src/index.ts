@@ -75,13 +75,6 @@ export default Server(() => {
 
    app.use('/', api(storages));
 
-  //  app.post("/signup/user", (req, res) => {
-  //   let { username, password, mail } = req.body;
-  //   let newUser = new User(uuidv4(), username, password, mail, getCurrentDate());
-  //   UserStorage.insert(newUser.id, newUser);
-  //   res.status(201).json({ msg: " User signed up successfully! " })                    
-  // })
-
    app.post("/ohlc", (req, res) => {
     console.log('...req.body', {...req.body});
       const crypto: Crypto =  {id: uuidv4(), createdAt: getCurrentDate(), ...req.body};
