@@ -1,19 +1,34 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Server, StableBTreeMap, ic } from 'azle';
 import express from 'express';
+import api from './api';
 
+class User {
+  id: string;
+  username: string;
+  password: string;
+  mail: string;
+  createdAt: Date;
+
+  constructor(id: string, username: string, password: string, mail: string, createdAt: Date) {
+      this.id = id;
+      this.username = username;
+      this.password = password;
+      this.mail = mail;
+      this.createdAt = createdAt;
+  }
+}
 
 class Crypto {
-  id: string;                                                                           // Unique identifier for the user
-  symbol: string;                                                                     // Username of the user
-  open: number;                                                                     // Password of the user
-  close: number;                                                                         // Email address of the user
-  high: number;                                                                         // Email address of the user
-  low: number;                                                                         // Email address of the user
-  idx_date: Date;                                                                      // Date when the user was created
-  createdAt: Date;                                                                      // Date when the user was created
+  id: string;
+  symbol: string;
+  open: number;
+  close: number;
+  high: number;
+  low: number;
+  idx_date: Date;
+  createdAt: Date;
 
-  // Constructor to initialize a User object
   constructor(
     id: string,
     symbol: string,
@@ -34,17 +49,43 @@ class Crypto {
   }
 }
 
+class ApiKey {
+  id: string;
+  username: string;
+  createdAt: Date;
+  expiresAt: Date;
 
-const cryptoStorage = StableBTreeMap<string, Crypto>(0);
+  constructor(id: string, username: string, createdAt: Date, expiresAt: Date) {
+      this.id = id;
+      this.username = username;
+      this.createdAt = createdAt;
+      this.expiresAt = expiresAt;
+  }
+}
+
+const CryptoStorage = StableBTreeMap<string, Crypto>(0);
+const UserStorage = StableBTreeMap<string, User>(1);
+const ApiKeyStorage = StableBTreeMap<string, ApiKey>(2);
+
+const storages = { CryptoStorage, UserStorage, ApiKeyStorage };
 
 export default Server(() => {
    const app = express();
    app.use(express.json());
 
+   app.use('/', api(storages));
+
+  //  app.post("/signup/user", (req, res) => {
+  //   let { username, password, mail } = req.body;
+  //   let newUser = new User(uuidv4(), username, password, mail, getCurrentDate());
+  //   UserStorage.insert(newUser.id, newUser);
+  //   res.status(201).json({ msg: " User signed up successfully! " })                    
+  // })
+
    app.post("/ohlc", (req, res) => {
     console.log('...req.body', {...req.body});
       const crypto: Crypto =  {id: uuidv4(), createdAt: getCurrentDate(), ...req.body};
-      cryptoStorage.insert(crypto.id, crypto);
+      CryptoStorage.insert(crypto.id, crypto);
       res.json(crypto);
    });
 
@@ -52,7 +93,7 @@ export default Server(() => {
     const symbol: any = req.query.symbol;
     console.log('symbol', symbol);
 
-    let records = cryptoStorage.values();
+    let records = CryptoStorage.values();
     console.log('records', records)
 
     let values: any = [];
@@ -79,7 +120,7 @@ export default Server(() => {
 
    app.get("/ohlc/:id", (req, res) => {
     const id = req.params.id;
-    const record = cryptoStorage.get(id).Some;
+    const record = CryptoStorage.get(id).Some;
     const crypto_details = {
       id: record?.id,
       symbol: record?.symbol,
